@@ -1,24 +1,54 @@
-from flask import Flask
-from flask_restful import Api
-from flask_jwt import JWT
-
-from security import authenticate, identity
-from resources.users import UserRegister
-from resources.items import Item,ItemList
-from db import db
+from flask import Flask, request
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATION']=False
-app.secret_key = "Sagar_key"
-api = Api(app)
 
-jwt = JWT(app,authenticate,identity) #/auth
+stores = [
+    {
+        "name": "My Store",
+        "items": [
+            {
+                "name": "Chair",
+                "price": 15.99
+            }
+        ]
+    }
+]
 
-api.add_resource(Item,'/item/<string:name>')
-api.add_resource(ItemList,'/items')
-api.add_resource(UserRegister,'/register')
+@app.get("/store")
+def get_stores():
+    return {"stores": stores}
 
-if __name__ == "__main__":
-   db.init_app(app)
-   app.run(port = 5000,debug = True)
+
+@app.post("/store")
+def create_store():
+    request_data = request.get_json()
+    new_store = {"name": request_data["name"], "items": []}
+    stores.append(new_store)
+    return new_store, 201
+
+
+@app.post("/store/<string:name>/item")
+def create_item(name):
+    request_data = request.get_json()
+    for store in stores:
+        if store["name"] == name:
+            new_item = {"name": request_data["name"], "price": request_data["price"]}
+            store["items"].append(new_item)
+            return new_item, 201
+    return {"message": "Store not found"}, 404
+
+
+@app.get("/store/<string:name>")
+def get_store(name):
+    for store in stores:
+        if store["name"] == name:
+            return store
+    return {"message": "Store not found"}, 404
+
+
+@app.get("/store/<string:name>/item")
+def get_item_in_store(name):
+    for store in stores:
+        if store["name"] == name:
+            return {"items": store["items"]}
+    return {"message": "Store not found"}, 404
