@@ -1,5 +1,6 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 
 from db import db
@@ -44,7 +45,8 @@ class ItemList(MethodView):
     @blp.response(200, ItemSchema(many=True))
     def get(self):
         return ItemModel.query.all()
-
+    
+    @jwt_required()
     @blp.arguments(ItemSchema)
     @blp.response(201, ItemSchema)
     def post(self, item_data):
