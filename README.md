@@ -1,5 +1,5 @@
 # Rest_Api_Flask
-Its an RESTFUL API created by FLask Web Framework
+Its an RESTFUL API created by FLask Web Framework in this repo
 It includes the documentation as well for the API using swagger UI in detailed format.
 
 
